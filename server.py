@@ -20,9 +20,12 @@ config = FeedConfig(
 )
 
 useragent_list = get_useragent_list(DeviceType.PHONES, config)
-config.useragent = random.choice(useragent_list)
-config.session.headers['User-Agent'] = config.useragent
-config.logger.debug(f"Using user-agent: {config.useragent}")
+
+
+def set_useragent():
+    config.useragent = random.choice(useragent_list)
+    config.session.headers['User-Agent'] = config.useragent
+    config.logger.debug(f"Using user-agent: {config.useragent}")
 
 
 def generate_response(query):
@@ -46,6 +49,9 @@ def process_listing():
         'date_str': request.args.get('on') or TrainlineQuery.date_str,
         'weeks_ahead_str': request.args.get('weeks') or TrainlineQuery.weeks_ahead_str
     }
+
+    if not config.useragent:
+        set_useragent()
 
     query = TrainlineQuery(status=QueryStatus(), config=config, **request_dict)
 

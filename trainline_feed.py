@@ -18,24 +18,21 @@ local_session = CachedSession(
     stale_if_error=True,
     expire_after=CACHE_EXPIRATION_SEC,
     backend='memory',
-    # cache_control=True
 )
 
 req_headers = {
     'Accept': 'application/json',
-    # 'Accept-Language': 'en-GB',
     'Connection': 'keep-alive',
     'Content-Type': 'text/plain;charset=UTF-8',
-    # 'Pragma': 'no-cache',
-    # 'Cache-Control': 'no-cache',
-    # 'Accept-Encoding': 'gzip, deflate, br',
-    # 'Origin': 'https://www.trainline.com',
-    # 'DNT': '1',
-    # 'TE': 'trailers',
-    # 'Sec-Fetch-Dest': 'empty',
-    # 'Sec-Fetch-Mode': 'cors',
-    # 'Sec-Fetch-Site': 'same-origin',
-
+    'Pragma': 'no-cache',
+    'Cache-Control': 'no-cache',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Origin': 'https://www.trainline.com',
+    'DNT': '1',
+    'TE': 'trailers',
+    'Sec-Fetch-Dest': 'empty',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'same-origin',
 }
 
 
@@ -76,6 +73,9 @@ def get_response_dict(url, query, body):
         if response.text.find('captcha'):
             bot_msg = f"{query.journey} - bot detected"
             logger.error(bot_msg)
+            query.config.useragent = None   # clear user-agent
+            query.config.session.cookies.clear()    # clear cookies
+
             abort(503, bot_msg)
         else:
             logger.error(f"{query.journey} - error from source")
