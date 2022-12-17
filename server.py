@@ -12,7 +12,7 @@ from trainline_feed_data import FeedConfig, QueryStatus, TrainlineQuery
 app = Flask(__name__)
 app.config.update({'JSONIFY_MIMETYPE': 'application/feed+json'})
 
-app.debug = True
+# app.debug = True
 
 config = FeedConfig(
     session=CachedSession(backend='memory', stale_if_error=True),
