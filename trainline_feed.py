@@ -32,7 +32,7 @@ def get_newrelic_version(query):
 
     init_response = config.session.get(config.url)
     config.logger.debug(
-        f"{query.journey} - querying endpoint: {config.url}")
+        f"{query.journey} - getting newrelic version: {config.url}")
     match = re.search(version_pattern, init_response.text)
     if match:
         config.newrelic_version = match[1]
@@ -69,9 +69,10 @@ def get_response_dict(url, query, body):
     if not response.ok:
         if response.text.find('captcha'):
             bot_msg = f"{query.journey} - bot detected, resetting session"
-            reset_query_session(query)
 
             logger.error(bot_msg)
+            reset_query_session(query)
+
             abort(503, bot_msg)
         else:
             logger.error(f"{query.journey} - error from source")
