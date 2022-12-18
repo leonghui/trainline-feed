@@ -243,6 +243,6 @@ def get_item_listing(query):
 
     feed_items = generate_items(query, result_dict)
 
-    json_feed = get_top_level_feed(base_url, query, feed_items)
+    json_feed = get_top_level_feed(base_url, query, [feed_items])
 
     return json_feed
