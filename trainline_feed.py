@@ -96,7 +96,7 @@ def get_top_level_feed(base_url, query, feed_items):
     origin_code = query.from_code.upper()
     dest_code = query.to_code.upper()
 
-    title_strings = [domain, origin_code + '>' + dest_code]
+    title_strings = [domain, query.journey]
 
     if isinstance(query, TrainlineQuery):
         home_page_url = base_url
@@ -121,7 +121,7 @@ def generate_items(query, result_dict):
         return f"<p>{date.isoformat(timespec='minutes').replace('+00:00', 'Z')}" + \
             f": {price}</p>"
 
-    timestamp = datetime.now().timestamp()
+    iso_timestamp = datetime.now().isoformat('T')
 
     item_link_url = base_url
 
@@ -131,11 +131,11 @@ def generate_items(query, result_dict):
     content_body = ''.join(content_body_list)
 
     feed_item = JsonFeedItem(
-        id=datetime.utcfromtimestamp(timestamp).isoformat('T'),
+        id=iso_timestamp,
         url=item_link_url,
         title=item_title_text,
         content_html=content_body,
-        date_published=datetime.utcfromtimestamp(timestamp).isoformat('T')
+        date_published=iso_timestamp
     )
 
     return feed_item
