@@ -1,5 +1,5 @@
 # trainline-feed
-A simple Python script to generate a [JSON Feed](https://github.com/manton/JSONFeed) for search results on [Trainline](https://www.trainline.com).
+A simple Python script to generate a [JSON Feed](https://github.com/manton/JSONFeed) for search for train tickets on [Trainline](https://www.trainline.com). Only supports single (one-way) Standard-class tickets for now.
 
 Served over [Flask!](https://github.com/pallets/flask/)
 
