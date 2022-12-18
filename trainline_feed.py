@@ -121,20 +121,13 @@ def generate_items(query, result_dict):
         return f"<p>{date.isoformat(timespec='minutes').replace('+00:00', 'Z')}" + \
             f": {price}</p>"
 
-    content_body_list = [
-        f"{get_price_entry(date, price)}" for date, price in result_dict.items()]
-
     timestamp = datetime.now().timestamp()
-
-    def get_formatted_timestamp():
-        return datetime.fromtimestamp(timestamp) \
-            .strftime('%d %B %Y %I:%M%p')
-
-    timestamp_html = f"<p>Last updated: {get_formatted_timestamp()}</p>"
 
     item_link_url = base_url
 
-    content_body_list.append(timestamp_html)
+    content_body_list = [
+        f"{get_price_entry(date, price)}" for date, price in result_dict.items()]
+
     content_body = ''.join(content_body_list)
 
     feed_item = JsonFeedItem(
