@@ -201,8 +201,6 @@ def get_item_listing(query):
 
                 departure_dt = datetime.fromisoformat(
                     first_journey['departAt'])
-                # arrival_dt = datetime.fromisoformat(
-                #     first_journey['arriveAt'])
 
             fares = json_dict['data']['journeySearch']['fares']
 
@@ -234,12 +232,6 @@ def get_item_listing(query):
                         str(selected_fare['fullPrice']['amount'])
         else:
             result_dict[date] = 'Not found'
-
-    # json_feed = get_top_level_feed(base_url, query, [])
-
-    # if not result_dict:
-    #     logger.info(query.journey + ' - fares not found')
-    #     return json_feed
 
     feed_items = generate_items(query, result_dict)
 
