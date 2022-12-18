@@ -9,13 +9,19 @@ from trainline_feed import get_item_listing
 from trainline_feed_data import FeedConfig, QueryStatus, TrainlineQuery
 
 
+CACHE_EXPIRATION_SEC = 60
+
 app = Flask(__name__)
 app.config.update({'JSONIFY_MIMETYPE': 'application/feed+json'})
 
 # app.debug = True
 
 config = FeedConfig(
-    session=CachedSession(backend='memory', stale_if_error=True),
+    session=CachedSession(
+        allowable_methods=('GET', 'POST'),
+        stale_if_error=True,
+        expire_after=CACHE_EXPIRATION_SEC,
+        backend='memory'),
     logger=create_logger(app)
 )
 

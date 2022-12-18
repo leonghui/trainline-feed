@@ -4,21 +4,10 @@ from datetime import datetime, timedelta
 from urllib.parse import urlparse
 from flask import abort
 from requests.exceptions import JSONDecodeError, RequestException
-from requests_cache import CachedSession
 
 from json_feed_data import JSONFEED_VERSION_URL, JsonFeedItem, JsonFeedTopLevel
 from trainline_feed_data import FareTypes, TrainlineQuery
 
-
-CACHE_EXPIRATION_SEC = 120
-SESSION_TIMEOUT_SEC = 2
-
-local_session = CachedSession(
-    allowable_methods=('GET', 'POST'),
-    stale_if_error=True,
-    expire_after=CACHE_EXPIRATION_SEC,
-    backend='memory',
-)
 
 req_headers = {
     'Accept': 'application/json',
@@ -37,45 +26,52 @@ req_headers = {
 
 
 def get_newrelic_version(query):
+    config = query.config
+
     version_pattern = r'(?:window\.__VERSION__=")([0-9.]{9})"'
 
-    init_response = local_session.get(query.config.url)
-    query.config.logger.debug(
-        f"{query.journey} - querying endpoint: {query.config.url}")
+    init_response = config.session.get(config.url)
+    config.logger.debug(
+        f"{query.journey} - querying endpoint: {config.url}")
     match = re.search(version_pattern, init_response.text)
     if match:
-        query.config.newrelic_version = match[1]
-        req_headers['x-version'] = query.config.newrelic_version
+        config.newrelic_version = match[1]
+        req_headers['x-version'] = config.newrelic_version
+
+
+def reset_query_session(query):
+    query.config.useragent = None
+    query.config.session.cookies.clear()
+    get_newrelic_version(query)
 
 
 def get_response_dict(url, query, body):
     logger = query.config.logger
+    session = query.config.session
 
     req_headers['User-Agent'] = query.config.useragent
-    local_session.headers = req_headers
+    session.headers = req_headers
 
-    if not query.config.session.cookies or not query.config.newrelic_version:
-        get_newrelic_version(query)
+    if not session.cookies or not query.config.newrelic_version:
+        reset_query_session(query)
 
     logger.debug(
         f"{query.journey} - querying endpoint: {url}")
 
     try:
-        response = local_session.post(url, data=json.dumps(body),
-                                      timeout=SESSION_TIMEOUT_SEC)
+        response = session.post(url, data=json.dumps(body))
     except RequestException as rex:
-        query.config.session.cookies.clear()    # clear cookies
-        logger.error(f"{query.journey} - exception: {rex}")
+        session.cookies.clear()    # clear cookies
+        logger.error(f"{query.journey} - {type(rex)}: {rex}")
         return None
 
     # return HTTP error code
     if not response.ok:
         if response.text.find('captcha'):
-            bot_msg = f"{query.journey} - bot detected"
-            logger.error(bot_msg)
-            query.config.useragent = None   # clear user-agent
-            query.config.session.cookies.clear()    # clear cookies
+            bot_msg = f"{query.journey} - bot detected, resetting session"
+            reset_query_session(query)
 
+            logger.error(bot_msg)
             abort(503, bot_msg)
         else:
             logger.error(f"{query.journey} - error from source")
@@ -89,7 +85,7 @@ def get_response_dict(url, query, body):
     try:
         return response.json()
     except JSONDecodeError as jdex:
-        logger.error(f"{query.journey} - exception: {jdex}")
+        logger.error(f"{query.journey} - {type(jdex)}: {jdex}")
         return None
 
 
