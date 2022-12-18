@@ -10,7 +10,8 @@ from trainline_location import get_station_id
 
 CURRENCY_CODE = 'GBP'
 DEFAULT_COUNTRY = 'GB'
-TRAINLINE_URL = 'https://www.thetrainline.com'
+TRAINLINE_DOMAIN = 'www.thetrainline.com'
+TRAINLINE_URL = 'https://' + TRAINLINE_DOMAIN
 LOCATIONS_SEARCH_URI = '/api/locations-search/v1/search?'
 JOURNEY_SEARCH_URI = '/api/journey-search/'
 
@@ -21,10 +22,14 @@ request_headers = {
 }
 
 
-class FareTypes(str, Enum):  # allow comparison with strings
+class FilteredFareTypes(str, Enum):  # allow comparison with strings
     ADVANCE_SINGLE = 'Advance Single'
     OFFPEAK_DAY_SINGLE = 'Off-Peak Day Single'
+    ANYTIME_DAY_SINGLE = 'Anytime Day Single'
 
+    @classmethod
+    def values(self):
+        return list(map(lambda c: c.value, self))
 
 @dataclass()
 class FeedConfig():
@@ -34,6 +39,7 @@ class FeedConfig():
     newrelic_version: str = ''
     country: str = DEFAULT_COUNTRY
     url: str = TRAINLINE_URL
+    domain: str = TRAINLINE_DOMAIN
     locations_uri: str = LOCATIONS_SEARCH_URI
     journey_uri: str = JOURNEY_SEARCH_URI
     currency: str = CURRENCY_CODE

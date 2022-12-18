@@ -1,11 +1,10 @@
 import json
 from datetime import datetime, timedelta
-from urllib.parse import urlparse
 from flask import abort
 from requests.exceptions import JSONDecodeError, RequestException
 
 from json_feed_data import JSONFEED_VERSION_URL, JsonFeedItem, JsonFeedTopLevel
-from trainline_feed_data import FareTypes, TrainlineQuery
+from trainline_feed_data import FilteredFareTypes
 
 
 
@@ -57,21 +56,17 @@ def get_response_dict(url, query, body):
         return None
 
 
-def get_top_level_feed(base_url, query, feed_items):
+def get_top_level_feed(query, feed_items):
 
-    parse_object = urlparse(base_url)
-    domain = parse_object.netloc
+    title_strings = [query.config.domain, query.journey]
 
-    title_strings = [domain, query.journey]
-
-    if isinstance(query, TrainlineQuery):
-        home_page_url = base_url
+    base_url = query.config.url
 
     json_feed = JsonFeedTopLevel(
         version=JSONFEED_VERSION_URL,
         items=feed_items,
         title=' - '.join(title_strings),
-        home_page_url=home_page_url,
+        home_page_url=base_url,
         favicon=base_url + '/favicon.ico'
     )
 
@@ -79,9 +74,7 @@ def get_top_level_feed(base_url, query, feed_items):
 
 
 def generate_items(query, result_dict):
-    base_url = query.config.url
-
-    item_title_text = base_url + ' - ' + query.journey
+    item_title_text = query.config.domain + ' - ' + query.journey
 
     def get_price_entry(date, price):
         return f"<p>{date.isoformat(timespec='minutes').replace('+00:00', 'Z')}" + \
@@ -89,7 +82,7 @@ def generate_items(query, result_dict):
 
     iso_timestamp = datetime.now().isoformat('T')
 
-    item_link_url = base_url
+    item_link_url = query.config.url
 
     content_body_list = [
         f"{get_price_entry(date, price)}" for date, price in result_dict.items()]
@@ -132,9 +125,7 @@ def get_request_bodies(query, dates):
 
 
 def get_item_listing(query):
-    base_url = query.config.url
-
-    query_url = base_url + query.config.journey_uri
+    query_url = query.config.url + query.config.journey_uri
 
     dates = [query.timestamp + timedelta(days=(7 * x))
              for x in range(query.weeks_ahead + 1)]
@@ -164,8 +155,7 @@ def get_item_listing(query):
                 fare_types = json_dict['data']['fareTypes']
                 advance_fare_type_ids = [fare_type['id'] for fare_type in list(
                     fare_types.values())
-                    if fare_type['name'] == FareTypes.ADVANCE_SINGLE or
-                    fare_type['name'] == FareTypes.OFFPEAK_DAY_SINGLE]
+                    if fare_type['name'] in FilteredFareTypes.values()]
 
                 advance_fares = [
                     fare for fare in fare_list if fare['fareType'] in advance_fare_type_ids]
@@ -190,6 +180,6 @@ def get_item_listing(query):
 
     feed_items = generate_items(query, result_dict)
 
-    json_feed = get_top_level_feed(base_url, query, [feed_items])
+    json_feed = get_top_level_feed(query, [feed_items])
 
     return json_feed
