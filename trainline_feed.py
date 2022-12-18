@@ -1,5 +1,4 @@
 import json
-import re
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
 from flask import abort
@@ -9,51 +8,20 @@ from json_feed_data import JSONFEED_VERSION_URL, JsonFeedItem, JsonFeedTopLevel
 from trainline_feed_data import FareTypes, TrainlineQuery
 
 
-req_headers = {
-    'Accept': 'application/json',
-    'Connection': 'keep-alive',
-    'Content-Type': 'text/plain;charset=UTF-8',
-    'Pragma': 'no-cache',
-    'Cache-Control': 'no-cache',
-    'Accept-Encoding': 'gzip, deflate, br',
-    'Origin': 'https://www.trainline.com',
-    'DNT': '1',
-    'TE': 'trailers',
-    'Sec-Fetch-Dest': 'empty',
-    'Sec-Fetch-Mode': 'cors',
-    'Sec-Fetch-Site': 'same-origin',
-}
-
-
-def get_newrelic_version(query):
-    config = query.config
-
-    version_pattern = r'(?:window\.__VERSION__=")([0-9.]{9})"'
-
-    init_response = config.session.get(config.url)
-    config.logger.debug(
-        f"{query.journey} - getting newrelic version: {config.url}")
-    match = re.search(version_pattern, init_response.text)
-    if match:
-        config.newrelic_version = match[1]
-        req_headers['x-version'] = config.newrelic_version
-
 
 def reset_query_session(query):
     query.config.useragent = None
     query.config.session.cookies.clear()
-    get_newrelic_version(query)
 
 
 def get_response_dict(url, query, body):
-    logger = query.config.logger
-    session = query.config.session
+    config = query.config
+    logger = config.logger
+    session = config.session
 
-    req_headers['User-Agent'] = query.config.useragent
-    session.headers = req_headers
-
-    if not session.cookies or not query.config.newrelic_version:
-        reset_query_session(query)
+    config.headers['User-Agent'] = config.useragent
+    config.headers['x-version'] = config.newrelic_version
+    session.headers = config.headers
 
     logger.debug(
         f"{query.journey} - querying endpoint: {url}")
@@ -61,7 +29,6 @@ def get_response_dict(url, query, body):
     try:
         response = session.post(url, data=json.dumps(body))
     except RequestException as rex:
-        session.cookies.clear()    # clear cookies
         logger.error(f"{query.journey} - {type(rex)}: {rex}")
         return None
 
@@ -94,8 +61,6 @@ def get_top_level_feed(base_url, query, feed_items):
 
     parse_object = urlparse(base_url)
     domain = parse_object.netloc
-    origin_code = query.from_code.upper()
-    dest_code = query.to_code.upper()
 
     title_strings = [domain, query.journey]
 

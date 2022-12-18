@@ -14,6 +14,12 @@ TRAINLINE_URL = 'https://www.thetrainline.com'
 LOCATIONS_SEARCH_URI = '/api/locations-search/v1/search?'
 JOURNEY_SEARCH_URI = '/api/journey-search/'
 
+request_headers = {
+    'Accept': 'application/json',
+    'Content-Type': 'text/plain;charset=UTF-8',
+    'Accept-Encoding': 'gzip, deflate, br',
+}
+
 
 class FareTypes(str, Enum):  # allow comparison with strings
     ADVANCE_SINGLE = 'Advance Single'
@@ -31,6 +37,7 @@ class FeedConfig():
     locations_uri: str = LOCATIONS_SEARCH_URI
     journey_uri: str = JOURNEY_SEARCH_URI
     currency: str = CURRENCY_CODE
+    headers: dict = field(default_factory=dict)
 
 
 @dataclass
