@@ -150,7 +150,7 @@ def get_item_listing(query):
 
             if isinstance(fares, dict):
                 fare_list = list(fares.values())
-                fare_types = json_dict['data']['fareTypes']
+                fare_types = json_dict.get('data').get('fareTypes')
 
                 selected_fare = None
 
@@ -165,8 +165,21 @@ def get_item_listing(query):
                         if fare['fullPrice']['amount'] == lowest_price][0]
 
                 if selected_fare:
-                    result_dict[departure_dt] = query.config.currency + \
-                        str(selected_fare['fullPrice']['amount'])
+                    remaining_seats = selected_fare['availability'].get(
+                        'remaining')
+
+                    fare_type_name = [
+                        fare_type['name'] for fare_type in fare_types.values()
+                        if fare_type['id'] == selected_fare['fareType']][0]
+                    fare_price = str(selected_fare['fullPrice']['amount'])
+
+                    fare_text = [query.config.currency,
+                                 fare_price, f"({fare_type_name})"]
+
+                    if remaining_seats:
+                        fare_text.insert(2, f"({remaining_seats} left)")
+
+                    result_dict[departure_dt] = ' '.join(fare_text)
         else:
             result_dict[date] = 'Not found'
 
