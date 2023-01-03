@@ -65,7 +65,7 @@ def get_top_level_feed(query, feed_items):
         items=feed_items,
         title=' - '.join(title_strings),
         home_page_url=base_url,
-        favicon=base_url + '/favicon.ico'
+        favicon=query.config.favicon_url
     )
 
     return json_feed
