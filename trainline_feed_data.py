@@ -22,15 +22,6 @@ request_headers = {
 }
 
 
-class FilteredFareTypes(str, Enum):  # allow comparison with strings
-    ADVANCE_SINGLE = 'Advance Single'
-    OFFPEAK_DAY_SINGLE = 'Off-Peak Day Single'
-    ANYTIME_DAY_SINGLE = 'Anytime Day Single'
-
-    @classmethod
-    def values(self):
-        return list(map(lambda c: c.value, self))
-
 @dataclass()
 class FeedConfig():
     session: CachedSession

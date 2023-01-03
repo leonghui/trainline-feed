@@ -4,8 +4,6 @@ from flask import abort
 from requests.exceptions import JSONDecodeError, RequestException
 
 from json_feed_data import JSONFEED_VERSION_URL, JsonFeedItem, JsonFeedTopLevel
-from trainline_feed_data import FilteredFareTypes
-
 
 
 def reset_query_session(query):
@@ -153,23 +151,17 @@ def get_item_listing(query):
             if isinstance(fares, dict):
                 fare_list = list(fares.values())
                 fare_types = json_dict['data']['fareTypes']
-                advance_fare_type_ids = [fare_type['id'] for fare_type in list(
-                    fare_types.values())
-                    if fare_type['name'] in FilteredFareTypes.values()]
-
-                advance_fares = [
-                    fare for fare in fare_list if fare['fareType'] in advance_fare_type_ids]
 
                 selected_fare = None
 
-                if len(advance_fares) == 1:
-                    selected_fare = advance_fares[0]
-                elif len(advance_fares) > 1:
+                if len(fare_list) == 1:
+                    selected_fare = fare_list[0]
+                elif len(fare_list) > 1:
                     fare_prices = [float(fare['fullPrice']['amount'])
-                                   for fare in advance_fares]
+                                   for fare in fare_list]
                     lowest_price = min(fare_prices)
                     selected_fare = [
-                        fare for fare in advance_fares
+                        fare for fare in fare_list
                         if fare['fullPrice']['amount'] == lowest_price][0]
 
                 if selected_fare:
