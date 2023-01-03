@@ -31,7 +31,7 @@ def get_response_dict(url, query, body):
 
     # return HTTP error code
     if not response.ok:
-        if response.text.find('captcha'):
+        if response.text.find('captcha') != -1:
             bot_msg = f"{query.journey} - bot detected, resetting session"
 
             logger.error(bot_msg)
