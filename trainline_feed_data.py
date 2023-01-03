@@ -10,6 +10,7 @@ from trainline_location import get_station_id
 
 CURRENCY_CODE = 'GBP'
 DEFAULT_COUNTRY = 'GB'
+DEFAULT_LANGUAGE = 'en-GB'
 TRAINLINE_DOMAIN = 'www.thetrainline.com'
 TRAINLINE_URL = 'https://' + TRAINLINE_DOMAIN
 LOCATIONS_SEARCH_URI = '/api/locations-search/v1/search?'
@@ -17,8 +18,10 @@ JOURNEY_SEARCH_URI = '/api/journey-search/'
 
 request_headers = {
     'Accept': 'application/json',
-    'Content-Type': 'text/plain;charset=UTF-8',
     'Accept-Encoding': 'gzip, deflate, br',
+    'Accept-Language': DEFAULT_LANGUAGE,
+    'Content-Type': 'text/plain;charset=UTF-8',
+
 }
 
 
