@@ -2,7 +2,6 @@ import random
 import re
 
 from flask import Flask, abort, jsonify, request
-from flask.logging import create_logger
 from requests_cache import CachedSession
 
 from mozilla_devices import DeviceType, get_useragent_list
@@ -21,7 +20,7 @@ config = FeedConfig(
         stale_if_error=True,
         cache_control=True,
         backend='memory'),
-    logger=create_logger(app),
+    logger=app.logger,
     headers=request_headers
 )
 
