@@ -15,42 +15,43 @@ def get_response_dict(url, query, body):
     config = query.config
     logger = config.logger
     session = config.session
+    log_header = f"{query.journey} {body['transitDefinitions'][0]['journeyDate']['time']}"
 
     config.headers['User-Agent'] = config.useragent
     config.headers['x-version'] = config.newrelic_version
     session.headers = config.headers
 
     logger.debug(
-        f"{query.journey} - querying endpoint: {url}")
+        f"{log_header} - querying endpoint: {url}")
 
     try:
         response = session.post(url, data=json.dumps(body))
     except RequestException as rex:
-        logger.error(f"{query.journey} - {type(rex)}: {rex}")
+        logger.error(f"{log_header} - {type(rex)}: {rex}")
         return None
 
     # return HTTP error code
     if not response.ok:
         if response.text.find('captcha') != -1:
-            bot_msg = f"{query.journey} - bot detected, resetting session"
+            bot_msg = f"{log_header} - bot detected, resetting session"
 
             logger.error(bot_msg)
             reset_query_session(query)
 
             abort(503, bot_msg)
-        else:
-            logger.error(f"{query.journey} - error from source")
-            logger.debug(
-                f"{query.journey} - dumping input: {response.text}")
-        return None
+
+        logger.error(
+            f"{log_header} - HTTP {response.status_code}")
+        abort(response.status_code, response.text)
     else:
         logger.debug(
-            f"{query.journey} - response cached: {response.from_cache}")
+            f"{log_header} - response cached: {response.from_cache}")
 
     try:
         return response.json()
     except JSONDecodeError as jdex:
-        logger.error(f"{query.journey} - {type(jdex)}: {jdex}")
+        logger.error(
+            f"{log_header} - HTTP {response.status_code} {type(jdex)}: {jdex}")
         return None
 
 
@@ -75,8 +76,7 @@ def generate_items(query, result_dict):
     item_title_text = query.config.domain + ' - ' + query.journey
 
     def get_price_entry(date, price):
-        return f"<p>{date.isoformat(timespec='minutes').replace('+00:00', 'Z')}" + \
-            f": {price}</p>"
+        return f"{date.isoformat(timespec='minutes').replace('+00:00', 'Z')}: {price}"
 
     iso_timestamp = datetime.now().isoformat('T')
 
@@ -85,7 +85,7 @@ def generate_items(query, result_dict):
     content_body_list = [
         f"{get_price_entry(date, price)}" for date, price in result_dict.items()]
 
-    content_body = ''.join(content_body_list)
+    content_body = '<br/>'.join(content_body_list)
 
     feed_item = JsonFeedItem(
         id=iso_timestamp,
