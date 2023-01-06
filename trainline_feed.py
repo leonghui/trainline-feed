@@ -95,7 +95,7 @@ def generate_items(query, result_dict):
         id=iso_timestamp,
         url=item_link_url,
         title=item_title_text,
-        content_html=content_body,
+        content_html=content_body + '<br/>' if content_body else '',
         date_published=iso_timestamp
     )
 
