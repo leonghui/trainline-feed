@@ -32,6 +32,10 @@ def get_response_dict(url, query, body):
 
     # return HTTP error code
     if not response.ok:
+        if response.status_code == 400 and 'InvalidFormat' in response.text:
+            # ignore errors due to past departure dates
+            return None
+
         if response.text.find('captcha') != -1:
             bot_msg = f"{log_header} - bot detected, resetting session"
 

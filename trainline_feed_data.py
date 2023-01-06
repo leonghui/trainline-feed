@@ -92,15 +92,10 @@ class _BaseQuery:
 
     def validate_departure_date(self):
         if self.date_str:
-            temp_date = datetime.strptime(self.date_str, "%Y%m%d").date()
-
             date_rules = [self.date_str.isnumeric(), len(self.date_str) == 8]
 
             if not all(date_rules):
                 self.status.errors.append('Invalid departure date')
-
-            if temp_date < datetime.now().date():
-                self.status.errors.append('Departure date has passed')
 
     def validate_station_code(self):
         try:
