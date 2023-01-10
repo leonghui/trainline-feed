@@ -63,7 +63,8 @@ def process_listing():
         'to_code': request.args.get('to') or TrainlineQuery.to_code,
         'time_str': request.args.get('at') or TrainlineQuery.time_str,
         'date_str': request.args.get('on') or TrainlineQuery.date_str,
-        'weeks_ahead_str': request.args.get('weeks') or TrainlineQuery.weeks_ahead_str
+        'weeks_ahead_str': request.args.get('weeks') or TrainlineQuery.weeks_ahead_str,
+        'seats_left_str': request.args.get('seats_left') or TrainlineQuery.seats_left_str
     }
 
     if not config.useragent:
