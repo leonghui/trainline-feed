@@ -7,7 +7,7 @@ from requests_cache import CachedSession
 from trainline_location import get_station_id
 
 
-CURRENCY_CODE = 'GBP'
+CURRENCY_CODE = '£'
 DEFAULT_COUNTRY = 'GB'
 DEFAULT_LANGUAGE = 'en-GB'
 TRAINLINE_DOMAIN = 'thetrainline.com'
