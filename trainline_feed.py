@@ -80,7 +80,7 @@ def generate_items(query, result_dict):
     item_title_text = query.config.domain + ' - ' + query.journey
 
     def get_price_entry(date, price):
-        return f"{date.isoformat(timespec='minutes').replace('+00:00', 'Z')}: {price}"
+        return f"{date.replace(tzinfo=None).isoformat(timespec='minutes')}: {price}"
 
     iso_timestamp = datetime.now().isoformat('T')
 
