@@ -7,7 +7,6 @@ from requests_cache import CachedSession
 from trainline_location import get_station_id
 
 
-CURRENCY_CODE = '£'
 DEFAULT_COUNTRY = 'GB'
 DEFAULT_LANGUAGE = 'en-GB'
 TRAINLINE_DOMAIN = 'thetrainline.com'
@@ -37,7 +36,6 @@ class FeedConfig():
     domain: str = TRAINLINE_DOMAIN
     locations_uri: str = LOCATIONS_SEARCH_URI
     journey_uri: str = JOURNEY_SEARCH_URI
-    currency: str = CURRENCY_CODE
     headers: dict = field(default_factory=dict)
 
 

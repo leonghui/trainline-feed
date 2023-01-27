@@ -119,8 +119,7 @@ def get_request_bodies(query, dates):
                 }
             ],
             'type': 'single',
-            'maximumJourneys': 1,
-            'requestedCurrencyCode': query.config.currency
+            'maximumJourneys': 1
         }
         request_dict[date] = request_body
 
@@ -176,10 +175,12 @@ def get_item_listing(query):
                     fare_type_name = [
                         fare_type['name'] for fare_type in fare_types.values()
                         if fare_type['id'] == selected_fare['fareType']][0]
-                    fare_price = str(selected_fare['fullPrice']['amount'])
 
-                    fare_text = [query.config.currency,
-                                 fare_price, f"({fare_type_name})"]
+                    fare_price = selected_fare['fullPrice']
+                    currency = fare_price['currencyCode'].replace('GBP', '£')
+
+                    fare_text = [
+                        currency, f"{fare_price['amount']:.2f}", f"({fare_type_name})"]
 
                     if query.seats_left and remaining_seats:
                         fare_text.insert(2, f"({remaining_seats} left)")
