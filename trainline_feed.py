@@ -106,6 +106,7 @@ def get_request_bodies(query, dates):
     request_dict = {}
     for date in dates:
         request_body = {
+            'passengers': [],
             'transitDefinitions': [
                 {
                     'direction': 'outward',
