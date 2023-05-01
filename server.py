@@ -28,7 +28,7 @@ useragent_list = get_useragent_list(DeviceType.PHONES, config)
 
 
 def get_newrelic_version():
-    version_pattern = r'(?:window\.__VERSION__=")([0-9.]{9})"'
+    version_pattern = r'(?:window\.__VERSION__=")([0-9.]*)"'
 
     init_response = config.session.get(config.url)
     config.logger.debug(
