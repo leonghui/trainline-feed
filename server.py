@@ -23,7 +23,8 @@ config = FeedConfig(
     session=CachedSession(
         allowable_methods=("GET", "POST"),
         stale_if_error=True,
-        cache_control=True,
+        cache_control=False,
+        expire_after=300,
         backend="memory",
     ),
     logger=app.logger,
