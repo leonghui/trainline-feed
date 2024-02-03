@@ -10,18 +10,19 @@ from trainline_feed_data import FeedConfig, QueryStatus, TrainlineQuery, request
 
 
 app = Flask(__name__)
-app.config.update({'JSONIFY_MIMETYPE': 'application/feed+json'})
+app.config.update({"JSONIFY_MIMETYPE": "application/feed+json"})
 
 # app.debug = True
 
 config = FeedConfig(
     session=CachedSession(
-        allowable_methods=('GET', 'POST'),
+        allowable_methods=("GET", "POST"),
         stale_if_error=True,
         cache_control=True,
-        backend='memory'),
+        backend="memory",
+    ),
     logger=app.logger,
-    headers=request_headers
+    headers=request_headers,
 )
 
 useragent_list = get_useragent_list(DeviceType.PHONES, config)
@@ -31,8 +32,7 @@ def get_newrelic_version():
     version_pattern = r'(?:window\.__VERSION__=")([0-9.]*)"'
 
     init_response = config.session.get(config.url)
-    config.logger.debug(
-        f"Getting newrelic version: {config.url}")
+    config.logger.debug(f"Getting newrelic version: {config.url}")
     match = re.search(version_pattern, init_response.text)
     if match:
         config.newrelic_version = match[1]
@@ -40,7 +40,7 @@ def get_newrelic_version():
 
 def set_useragent():
     config.useragent = random.choice(useragent_list)
-    config.session.headers['User-Agent'] = config.useragent
+    config.session.headers["User-Agent"] = config.useragent
     config.logger.debug(f"Using user-agent: {config.useragent}")
 
 
@@ -54,8 +54,7 @@ def validate_headers():
 
 def generate_response(query):
     if not query.status.ok:
-        abort(400, description='Errors found: ' +
-              ', '.join(query.status.errors))
+        abort(400, description="Errors found: " + ", ".join(query.status.errors))
 
     config.logger.debug(query)  # log values
 
@@ -63,16 +62,17 @@ def generate_response(query):
     return jsonify(output)
 
 
-@app.route('/', methods=['GET'])
-@app.route('/journey', methods=['GET'])
+@app.route("/", methods=["GET"])
+@app.route("/journey", methods=["GET"])
 def process_listing():
     request_dict = {
-        'from_code': request.args.get('from') or TrainlineQuery.from_code,
-        'to_code': request.args.get('to') or TrainlineQuery.to_code,
-        'time_str': request.args.get('at') or TrainlineQuery.time_str,
-        'date_str': request.args.get('on') or TrainlineQuery.date_str,
-        'weeks_ahead_str': request.args.get('weeks') or TrainlineQuery.weeks_ahead_str,
-        'seats_left_str': request.args.get('seats_left') or TrainlineQuery.seats_left_str
+        "from_code": request.args.get("from") or TrainlineQuery.from_code,
+        "to_code": request.args.get("to") or TrainlineQuery.to_code,
+        "time_str": request.args.get("at") or TrainlineQuery.time_str,
+        "date_str": request.args.get("on") or TrainlineQuery.date_str,
+        "weeks_ahead_str": request.args.get("weeks") or TrainlineQuery.weeks_ahead_str,
+        "seats_left_str": request.args.get("seats_left")
+        or TrainlineQuery.seats_left_str,
     }
 
     validate_headers()
@@ -82,4 +82,4 @@ def process_listing():
     return generate_response(query)
 
 
-app.run(host='0.0.0.0')
+app.run(host="0.0.0.0")
