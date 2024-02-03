@@ -6,7 +6,12 @@ from requests_cache import CachedSession
 
 from mozilla_devices import DeviceType, get_useragent_list
 from trainline_feed import get_item_listing
-from trainline_feed_data import FeedConfig, QueryStatus, TrainlineQuery, request_headers
+from trainline_feed_data import (
+    FeedConfig,
+    QueryStatus,
+    DatetimeQuery,
+    request_headers,
+)
 
 
 app = Flask(__name__)
@@ -66,18 +71,19 @@ def generate_response(query):
 @app.route("/journey", methods=["GET"])
 def process_listing():
     request_dict = {
-        "from_code": request.args.get("from") or TrainlineQuery.from_code,
-        "to_code": request.args.get("to") or TrainlineQuery.to_code,
-        "time_str": request.args.get("at") or TrainlineQuery.time_str,
-        "date_str": request.args.get("on") or TrainlineQuery.date_str,
-        "weeks_ahead_str": request.args.get("weeks") or TrainlineQuery.weeks_ahead_str,
+        "from_code": request.args.get("from") or DatetimeQuery.from_code,
+        "to_code": request.args.get("to") or DatetimeQuery.to_code,
+        "time_str": request.args.get("at") or DatetimeQuery.time_str,
+        "date_str": request.args.get("on") or DatetimeQuery.date_str,
+        "weeks_ahead_str": request.args.get("weeks")
+        or DatetimeQuery.weeks_ahead_str,
         "seats_left_str": request.args.get("seats_left")
-        or TrainlineQuery.seats_left_str,
+        or DatetimeQuery.seats_left_str,
     }
 
     validate_headers()
 
-    query = TrainlineQuery(status=QueryStatus(), config=config, **request_dict)
+    query = DatetimeQuery(status=QueryStatus(), config=config, **request_dict)
 
     return generate_response(query)
 

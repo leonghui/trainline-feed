@@ -58,11 +58,6 @@ class _BaseQuery:
     from_id: str = ""
     to_id: str = ""
     journey: str = ""
-    time_str: str = datetime.now().strftime("%H%M")
-    date_str: str = datetime.now().strftime("%Y%m%d")
-    timestamp: datetime = datetime.now()
-    weeks_ahead_str: str = "0"
-    weeks_ahead: int = 0
     seats_left_str: str = "false"
     seats_left: bool = False
 
@@ -76,32 +71,9 @@ class _BaseQuery:
     def init_journey(self):
         self.journey = self.from_code.upper() + ">" + self.to_code.upper()
 
-    def init_timestamp(self):
-        self.timestamp = datetime.strptime(
-            self.date_str + " " + self.time_str, "%Y%m%d %H%M"
-        )
-
-    def init_weeks_ahead(self):
-        if self.weeks_ahead_str:
-            self.weeks_ahead = int(self.weeks_ahead_str)
-
     def init_seats_left(self):
         if self.seats_left_str:
             self.seats_left = bool(self.seats_left_str.lower() in ("true", "y", "yes"))
-
-    def validate_departure_time(self):
-        if self.time_str:
-            time_rules = [self.time_str.isnumeric(), len(self.time_str) == 4]
-
-            if not all(time_rules):
-                self.status.errors.append("Invalid departure time")
-
-    def validate_departure_date(self):
-        if self.date_str:
-            date_rules = [self.date_str.isnumeric(), len(self.date_str) == 8]
-
-            if not all(date_rules):
-                self.status.errors.append("Invalid departure date")
 
     def validate_station_code(self):
         try:
@@ -118,11 +90,6 @@ class _BaseQuery:
         except (TypeError, AttributeError):
             self.status.errors.append("Invalid station code(s)")
 
-    def validate_weeks_ahead(self):
-        if self.weeks_ahead:
-            if not self.weeks_ahead_str.isnumeric():
-                self.status.errors.append("Invalid week count")
-
     def validate_seats_left(self):
         if self.seats_left_str:
             if not self.seats_left_str.isalpha():
@@ -130,7 +97,41 @@ class _BaseQuery:
 
 
 @dataclass()
-class TrainlineQuery(_BaseQuery):
+class DatetimeQuery(_BaseQuery):
+
+    time_str: str = datetime.now().strftime("%H%M")
+    date_str: str = datetime.now().strftime("%Y%m%d")
+    query_dt: datetime = datetime.now()
+    weeks_ahead_str: str = "0"
+    weeks_ahead: int = 0
+
+    def init_query_dt(self):
+        self.query_dt = datetime.strptime(
+            self.date_str + " " + self.time_str, "%Y%m%d %H%M"
+        )
+
+    def init_weeks_ahead(self):
+        if self.weeks_ahead_str:
+            self.weeks_ahead = int(self.weeks_ahead_str)
+
+    def validate_departure_time(self):
+        if self.time_str:
+            time_rules = [self.time_str.isnumeric(), len(self.time_str) == 4]
+
+            if not all(time_rules):
+                self.status.errors.append("Invalid departure time")
+
+    def validate_departure_date(self):
+        if self.date_str:
+            date_rules = [self.date_str.isnumeric(), len(self.date_str) == 8]
+
+            if not all(date_rules):
+                self.status.errors.append("Invalid departure date")
+
+    def validate_weeks_ahead(self):
+        if self.weeks_ahead:
+            if not self.weeks_ahead_str.isnumeric():
+                self.status.errors.append("Invalid week count")
 
     def __post_init__(self):
         self.validate_station_code()
@@ -143,7 +144,7 @@ class TrainlineQuery(_BaseQuery):
         if self.status.ok:
             self.init_station_ids(self.config)
             self.init_journey()
-            self.init_timestamp()
+            self.init_query_dt()
             self.init_weeks_ahead()
             self.init_seats_left()
             self.status.refresh()

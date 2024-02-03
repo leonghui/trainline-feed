@@ -126,7 +126,7 @@ def get_item_listing(query):
     query_url = query.config.url + query.config.journey_uri
 
     dates = [
-        query.timestamp + timedelta(days=(7 * x)) for x in range(query.weeks_ahead + 1)
+        query.query_dt + timedelta(days=(7 * x)) for x in range(query.weeks_ahead + 1)
     ]
 
     request_dict = get_request_bodies(query, dates)
