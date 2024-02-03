@@ -129,7 +129,7 @@ class DatetimeQuery(_BaseQuery):
                 self.status.errors.append("Invalid departure date")
 
     def validate_weeks_ahead(self):
-        if self.weeks_ahead:
+        if self.weeks_ahead_str:
             if not self.weeks_ahead_str.isnumeric():
                 self.status.errors.append("Invalid week count")
 
