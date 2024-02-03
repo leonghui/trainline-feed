@@ -44,6 +44,14 @@ def set_useragent():
     config.logger.debug(f"Using user-agent: {config.useragent}")
 
 
+def validate_headers():
+    if not config.useragent:
+        set_useragent()
+
+    if not config.newrelic_version:
+        get_newrelic_version()
+
+
 def generate_response(query):
     if not query.status.ok:
         abort(400, description='Errors found: ' +
@@ -67,11 +75,7 @@ def process_listing():
         'seats_left_str': request.args.get('seats_left') or TrainlineQuery.seats_left_str
     }
 
-    if not config.useragent:
-        set_useragent()
-
-    if not config.newrelic_version:
-        get_newrelic_version()
+    validate_headers()
 
     query = TrainlineQuery(status=QueryStatus(), config=config, **request_dict)
 
