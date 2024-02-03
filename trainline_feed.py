@@ -1,9 +1,13 @@
 import json
+import time
 from datetime import datetime, timedelta
 from flask import abort
 from requests.exceptions import JSONDecodeError, RequestException
 
 from json_feed_data import JSONFEED_VERSION_URL, JsonFeedItem, JsonFeedTopLevel
+
+
+CONNECT_WAIT_SEC = 2
 
 
 def reset_query_session(query):
@@ -192,6 +196,7 @@ def get_item_listing(query):
                     result_dict[departure_dt] = " ".join(fare_text)
         else:
             result_dict[date] = "Not found"
+        time.sleep(CONNECT_WAIT_SEC)
 
     feed_items = generate_items(query, result_dict)
 
