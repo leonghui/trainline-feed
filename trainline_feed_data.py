@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from logging import Logger
 
+import croniter
 from requests_cache import CachedSession
 
 from trainline_location import get_station_id
@@ -16,6 +17,7 @@ JOURNEY_SEARCH_URI = "/api/journey-search/"
 TRAINLINE_FAVICON_URL = (
     "https://static.trainlinecontent.com/content/WEB/images/favicon.ico"
 )
+QUERY_LIMIT = 5
 
 request_headers = {
     "Accept": "application/json",
@@ -146,5 +148,45 @@ class DatetimeQuery(_BaseQuery):
             self.init_journey()
             self.init_query_dt()
             self.init_weeks_ahead()
+            self.init_seats_left()
+            self.status.refresh()
+
+
+@dataclass()
+class CronQuery(_BaseQuery):
+
+    job_str: str = "0 8 * * 1-5"  #   0800 every weekday
+    count_str: str = str(QUERY_LIMIT)
+    count: int = QUERY_LIMIT
+
+    def init_count(self):
+        if self.count_str:
+            self.count = int(self.count_str)
+
+    def validate_job(self):
+        if self.job_str:
+            if not croniter.is_valid(job_str):
+                self.status.errors.append("Invalid cron expression")
+
+    def validate_count(self):
+        if self.count_str:
+            count_rules = [
+                self.count_str.isnumeric,
+                1 <= int(self.count_str) <= QUERY_LIMIT,
+            ]
+
+            if not all(count_rules):
+                self.status.errors.append("Invalid count")
+
+    def __post_init__(self):
+        self.validate_station_code()
+        self.validate_job()
+        self.validate_count()
+        self.validate_seats_left()
+        self.status.refresh()
+
+        if self.status.ok:
+            self.init_station_ids(self.config)
+            self.init_journey()
             self.init_seats_left()
             self.status.refresh()
