@@ -89,4 +89,4 @@ def process_listing():
     return generate_response(query)
 
 
-app.run(host="0.0.0.0")
+app.run(host="0.0.0.0", use_reloader=False)
