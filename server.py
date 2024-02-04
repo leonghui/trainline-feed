@@ -76,8 +76,7 @@ def process_listing():
         "to_code": request.args.get("to") or DatetimeQuery.to_code,
         "time_str": request.args.get("at") or DatetimeQuery.time_str,
         "date_str": request.args.get("on") or DatetimeQuery.date_str,
-        "weeks_ahead_str": request.args.get("weeks")
-        or DatetimeQuery.weeks_ahead_str,
+        "weeks_ahead_str": request.args.get("weeks") or DatetimeQuery.weeks_ahead_str,
         "seats_left_str": request.args.get("seats_left")
         or DatetimeQuery.seats_left_str,
     }
