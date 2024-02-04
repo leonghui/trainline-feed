@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from logging import Logger
 
-import croniter
+from croniter import croniter
 from requests_cache import CachedSession
 
 from trainline_location import get_station_id
@@ -158,14 +158,20 @@ class CronQuery(_BaseQuery):
     job_str: str = "0 8 * * 1-5"  #   0800 every weekday
     count_str: str = str(QUERY_LIMIT)
     count: int = QUERY_LIMIT
+    skip_weeks_str: str = "0"
+    skip_weeks: int = 0
 
     def init_count(self):
         if self.count_str:
             self.count = int(self.count_str)
 
+    def init_skip_weeks(self):
+        if self.skip_weeks_str:
+            self.skip_weeks = int(self.skip_weeks_str)
+
     def validate_job(self):
         if self.job_str:
-            if not croniter.is_valid(job_str):
+            if not croniter.is_valid(self.job_str):
                 self.status.errors.append("Invalid cron expression")
 
     def validate_count(self):
@@ -178,15 +184,23 @@ class CronQuery(_BaseQuery):
             if not all(count_rules):
                 self.status.errors.append("Invalid count")
 
+    def validate_skip_weeks(self):
+        if self.skip_weeks_str:
+            if not self.skip_weeks_str.isnumeric():
+                self.status.errors.append("Invalid skipped week count")
+
     def __post_init__(self):
         self.validate_station_code()
         self.validate_job()
         self.validate_count()
+        self.validate_skip_weeks()
         self.validate_seats_left()
         self.status.refresh()
 
         if self.status.ok:
             self.init_station_ids(self.config)
             self.init_journey()
+            self.init_count()
+            self.init_skip_weeks()
             self.init_seats_left()
             self.status.refresh()

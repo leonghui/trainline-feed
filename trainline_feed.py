@@ -1,9 +1,12 @@
 import json
 import time
 from datetime import datetime, timedelta
+
+from croniter import croniter
 from flask import abort
 from requests.exceptions import JSONDecodeError, RequestException
 
+from trainline_feed_data import DatetimeQuery, CronQuery
 from json_feed_data import JSONFEED_VERSION_URL, JsonFeedItem, JsonFeedTopLevel
 
 
@@ -82,7 +85,12 @@ def get_top_level_feed(query, feed_items):
 
 
 def generate_items(query, result_dict):
-    item_title_text = query.config.domain + " - " + query.journey
+    item_title_list = [query.config.domain, query.journey]
+
+    if isinstance(query, CronQuery):
+        item_title_list.append(query.job_str)
+
+    item_title_text = " - ".join(item_title_list)
 
     def get_price_entry(date, price):
         return f"{date.replace(tzinfo=None).isoformat(timespec='minutes')}: {price}"
@@ -129,12 +137,22 @@ def get_request_bodies(query, dates):
     return request_dict
 
 
+def get_dates(query):
+    if isinstance(query, DatetimeQuery):
+        return [
+            query.query_dt + timedelta(days=(7 * x))
+            for x in range(query.weeks_ahead + 1)
+        ]
+    elif isinstance(query, CronQuery):
+        base = datetime.now() + timedelta(days=(7 * query.skip_weeks))
+        iter = croniter(query.job_str, base)
+        return [iter.get_next(datetime) for _ in range(0, query.count)]
+
+
 def get_item_listing(query):
     query_url = query.config.url + query.config.journey_uri
 
-    dates = [
-        query.query_dt + timedelta(days=(7 * x)) for x in range(query.weeks_ahead + 1)
-    ]
+    dates = get_dates(query)
 
     request_dict = get_request_bodies(query, dates)
 

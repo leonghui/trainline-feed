@@ -9,6 +9,7 @@ from trainline_feed import get_item_listing
 from trainline_feed_data import (
     FeedConfig,
     QueryStatus,
+    CronQuery,
     DatetimeQuery,
     request_headers,
 )
@@ -84,6 +85,25 @@ def process_listing():
     validate_headers()
 
     query = DatetimeQuery(status=QueryStatus(), config=config, **request_dict)
+
+    return generate_response(query)
+
+
+@app.route("/cron", methods=["GET"])
+def process_cron():
+    request_dict = {
+        "from_code": request.args.get("from") or CronQuery.from_code,
+        "to_code": request.args.get("to") or CronQuery.to_code,
+        "job_str": request.args.get("job") or CronQuery.job_str,
+        "count_str": request.args.get("count") or CronQuery.count_str,
+        "skip_weeks_str": request.args.get("skip_weeks") or CronQuery.skip_weeks_str,
+        "seats_left_str": request.args.get("seats_left")
+        or DatetimeQuery.seats_left_str,
+    }
+
+    validate_headers()
+
+    query = CronQuery(status=QueryStatus(), config=config, **request_dict)
 
     return generate_response(query)
 
