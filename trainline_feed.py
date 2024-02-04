@@ -16,13 +16,15 @@ def reset_query_session(query):
     query.config.session.cache.clear()
 
 
+def get_log_header(query, body):
+    return f"{query.journey} {body['transitDefinitions'][0]['journeyDate']['time']}"
+
+
 def get_response_dict(url, query, body):
     config = query.config
     logger = config.logger
     session = config.session
-    log_header = (
-        f"{query.journey} {body['transitDefinitions'][0]['journeyDate']['time']}"
-    )
+    log_header = get_log_header(query, body)
 
     config.headers["User-Agent"] = config.useragent
     config.headers["x-version"] = config.newrelic_version
