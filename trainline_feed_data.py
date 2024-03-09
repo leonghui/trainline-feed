@@ -22,7 +22,6 @@ request_headers = {
     "Accept": "application/json",
     "Accept-Encoding": "gzip, deflate, br",
     "Accept-Language": DEFAULT_LOCALE,
-    "Content-Type": "text/plain;charset=UTF-8",
 }
 
 

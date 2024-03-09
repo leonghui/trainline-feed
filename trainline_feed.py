@@ -1,4 +1,3 @@
-import json
 import time
 from datetime import datetime, timedelta
 
@@ -36,7 +35,7 @@ def get_response_dict(url, query, body):
     logger.debug(f"{log_header} - querying endpoint: {url}")
 
     try:
-        response = session.post(url, data=json.dumps(body))
+        response = session.post(url, json=body)
     except RequestException as rex:
         logger.error(f"{log_header} - {type(rex)}: {rex}")
         return None
