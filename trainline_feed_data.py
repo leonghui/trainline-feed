@@ -8,11 +8,10 @@ from requests_cache import CachedSession
 from trainline_location import get_station_id
 
 
-DEFAULT_COUNTRY = "GB"
-DEFAULT_LANGUAGE = "en-GB"
+DEFAULT_LOCALE = "en-GB"
 TRAINLINE_DOMAIN = "thetrainline.com"
 TRAINLINE_WEB_URL = "https://www." + TRAINLINE_DOMAIN
-LOCATIONS_SEARCH_URI = "/api/locations-search/v1/search?"
+LOCATIONS_SEARCH_URI = "/api/locations-search/v2/search?"
 JOURNEY_SEARCH_URI = "/api/journey-search/"
 TRAINLINE_FAVICON_URL = (
     "https://static.trainlinecontent.com/content/WEB/images/favicon.ico"
@@ -22,7 +21,7 @@ QUERY_LIMIT = 5
 request_headers = {
     "Accept": "application/json",
     "Accept-Encoding": "gzip, deflate, br",
-    "Accept-Language": DEFAULT_LANGUAGE,
+    "Accept-Language": DEFAULT_LOCALE,
     "Content-Type": "text/plain;charset=UTF-8",
 }
 
@@ -33,7 +32,7 @@ class FeedConfig:
     logger: Logger
     useragent: str = ""
     newrelic_version: str = ""
-    country: str = DEFAULT_COUNTRY
+    locale: str = DEFAULT_LOCALE
     url: str = TRAINLINE_WEB_URL
     favicon_url: str = TRAINLINE_FAVICON_URL
     domain: str = TRAINLINE_DOMAIN
