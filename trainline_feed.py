@@ -131,6 +131,9 @@ def get_request_bodies(query, dates):
             ],
             "type": "single",
             "maximumJourneys": 1,
+            "composition": [
+              "through"
+            ]
         }
         request_dict[date] = request_body
 
