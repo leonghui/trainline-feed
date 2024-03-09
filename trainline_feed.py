@@ -47,13 +47,13 @@ def get_response_dict(url, query, body):
             # ignore errors due to past departure dates
             return None
 
-        if response.text.find("captcha") != -1:
+        if response.status_code == 403 and response.text.find("captcha") != -1:
             bot_msg = f"{log_header} - bot detected, resetting session"
 
             logger.error(bot_msg)
             reset_query_session(query)
 
-            abort(503, bot_msg)
+            abort(403, bot_msg)
 
         logger.error(f"{log_header} - HTTP {response.status_code}")
         abort(response.status_code, response.text)
