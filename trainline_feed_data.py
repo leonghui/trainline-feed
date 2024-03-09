@@ -29,6 +29,7 @@ request_headers = {
 class FeedConfig:
     session: CachedSession
     logger: Logger
+    debug: bool = False
     useragent: str = ""
     newrelic_version: str = ""
     locale: str = DEFAULT_LOCALE

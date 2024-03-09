@@ -52,10 +52,14 @@ def get_response_dict(url, query, body):
             logger.error(bot_msg)
             reset_query_session(query)
 
-            abort(403, bot_msg)
+        error_body = ("Request headers:\n"
+                      f"{response.request.headers}"
+                      "\n\nResponse text:\n"
+                      f"{response.text}"
+        ) if config.debug else None
 
         logger.error(f"{log_header} - HTTP {response.status_code}")
-        abort(response.status_code, response.text)
+        abort(response.status_code, error_body)
     else:
         logger.debug(f"{log_header} - response cached: {response.from_cache}")
 
